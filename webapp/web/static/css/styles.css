@@ -592,6 +592,64 @@ button:disabled {
   font-family: var(--mono);
 }
 
+/* ── Info section ── */
+
+.info-card {
+  overflow: visible;
+}
+
+.info-body {
+  padding: 1rem 1.25rem 1.2rem;
+}
+
+.info-body p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.info-lead {
+  font-weight: 500;
+}
+
+.info-list {
+  margin: 0.65rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.info-list li {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.info-list strong {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.info-tip {
+  margin-top: 0.8rem !important;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--border);
+}
+
+.info-tip a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.info-tip a:hover {
+  text-decoration: underline;
+}
+
 /* ── Stagger animation ── */
 
 .stagger {
