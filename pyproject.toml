@@ -1,0 +1,19 @@
+[project]
+name = "cifar10-pytorch"
+version = "0.1.0"
+description = "A simple CIFAR-10 CNN classifier using PyTorch"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "certifi>=2024.0.0",
+    "numpy>=2.4.2",
+    "pillow>=12.1.1",
+    "torch>=2.10.0",
+    "torchinfo>=1.8.0",
+    "torchvision>=0.25.0",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.2.0",
+]
