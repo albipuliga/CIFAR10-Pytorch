@@ -1,27 +1,52 @@
 # CIFAR-10 PyTorch FastAPI Portfolio
 
-Inference-first web interface for a CIFAR-10 CNN project using FastAPI, typed APIs, and a polished single-page demo UI.
+Inference-first web interface for a CIFAR-10 CNN project using FastAPI and a PyTorch CNN model.
 
-## What I Built
-- FastAPI service with startup checkpoint loading (`baseline` + `cnnv2`).
-- API endpoints for health, model listing, prediction, and report artifacts.
-- Editorial-style demo page with drag/drop upload and top-k prediction view.
-- Structured request logging with request IDs and endpoint latency capture.
-- Docker packaging and Render deploy configuration.
+## Model Architecture
+The production `cnnv2` model is a 3-stage convolutional network for CIFAR-10 (`32x32` RGB input) with batch normalization and progressively stronger dropout regularization.
 
-## Architecture
-```mermaid
-flowchart LR
-    A["Browser UI (index.html + app.js)"] --> B["FastAPI Routes"]
-    B --> C["Preprocess Service"]
-    C --> D["Inference Service"]
-    D --> E["Model Registry (baseline/cnnv2)"]
-    E --> F["Checkpoint Files (src/checkpoints/*.pth)"]
-    B --> G["Reports Service"]
-    G --> H["results.json + confusion matrix (src/reports)"]
-```
+| Stage      | Layers                                        | Output Shape      | Dropout |
+| ---------- | --------------------------------------------- | ----------------- | ------- |
+| Input      | RGB image                                     | `[B, 3, 32, 32]`  | -       |
+| Stage 1    | `Conv(3->64) + BN + ReLU` x2, `MaxPool(2)`    | `[B, 64, 16, 16]` | `0.15`  |
+| Stage 2    | `Conv(64->128) + BN + ReLU` x2, `MaxPool(2)`  | `[B, 128, 8, 8]`  | `0.20`  |
+| Stage 3    | `Conv(128->256) + BN + ReLU` x2, `MaxPool(2)` | `[B, 256, 4, 4]`  | `0.30`  |
+| Head       | `AdaptiveAvgPool2d(1)`, `Flatten`             | `[B, 256]`        | -       |
+| Classifier | `Linear(256->10)`                             | `[B, 10]`         | -       |
 
-## Local Run (uv + FastAPI)
+### Tensor Shape Flow
+`[B, 3, 32, 32] -> [B, 64, 16, 16] -> [B, 128, 8, 8] -> [B, 256, 4, 4] -> [B, 256, 1, 1] -> [B, 256] -> [B, 10]`
+
+### Design Notes
+- All convolutions use `3x3` kernels with `padding=1` to preserve spatial resolution inside each stage.
+- Convolutions are created with `bias=False` because each is immediately followed by BatchNorm.
+- Dropout increases by depth (`0.15 -> 0.20 -> 0.30`) to regularize higher-level features.
+- The final layer outputs raw logits (no softmax in-model); post-processing (e.g., probabilities) is applied at inference time.
+
+## Model Performance
+Metrics below are from `src/reports/results.json` on the CIFAR-10 test set.
+
+| Model      | Accuracy | Macro Precision | Macro Recall | Macro F1 |
+| ---------- | -------- | --------------- | ------------ | -------- |
+| `cnnv2`    | `90.56%` | `90.53%`        | `90.56%`     | `90.52%` |
+| `baseline` | `77.17%` | `76.99%`        | `77.17%`     | `77.03%` |
+
+### Training Curves
+**CNNv2**
+![CNNv2 training curves](src/reports/figures/training_curves_cnnv2.png)
+
+**Baseline**
+![Baseline training curves](src/reports/figures/training_curves_baseline.png)
+
+### Confusion Matrices
+**CNNv2**
+![CNNv2 confusion matrix](src/reports/figures/confusion_matrix_cnnv2.png)
+
+**Baseline**
+![Baseline confusion matrix](src/reports/figures/confusion_matrix_baseline.png)
+
+
+## Run Locally
 1. Install dependencies:
    ```bash
    uv sync
@@ -46,7 +71,7 @@ flowchart LR
 3. Verify:
    - `http://localhost:8000/health`
 
-## Docker Dev (Hot Reload)
+## Docker Compose (Hot Reload)
 1. Start development container:
    ```bash
    docker compose -f docker-compose.dev.yml up --build
@@ -61,37 +86,15 @@ flowchart LR
   - `https://<your-service>.onrender.com`
 
 ## Public API
-| Method | Path | Purpose |
-|---|---|---|
-| GET | `/health` | service readiness and loaded models |
-| GET | `/api/v1/models` | available model metadata |
-| POST | `/api/v1/predict` | single-image prediction (multipart upload) |
-| GET | `/api/v1/reports` | metrics + figure metadata for UI |
-| GET | `/` | portfolio demo page |
+| Method | Path              | Purpose                                    |
+| ------ | ----------------- | ------------------------------------------ |
+| GET    | `/health`         | service readiness and loaded models        |
+| GET    | `/api/v1/models`  | available model metadata                   |
+| POST   | `/api/v1/predict` | single-image prediction (multipart upload) |
+| GET    | `/api/v1/reports` | metrics + figure metadata for UI           |
+| GET    | `/`               | portfolio demo page                        |
 
 ## Notes on Artifacts
 - Checkpoints expected at:
   - `src/checkpoints/best_baseline.pth`
   - `src/checkpoints/best_cnnv2.pth`
-- Report artifacts expected at:
-  - `src/reports/results.json`
-  - `src/reports/confusion_matrix.svg`
-
-## What I Optimized For
-- Clean inference path and deterministic JSON output.
-- Portfolio presentation quality without changing notebook training flow.
-- CPU-only behavior for predictable Render runtime.
-
-## Tradeoffs
-- `cnnv2` currently uses the same exported architecture/checkpoint family as baseline in this repository snapshot.
-- No retraining API in v1 (inference-only by design).
-- In-memory latency counters are reset on process restart.
-
-## Next Steps
-1. Add GitHub Actions (UV sync check + Docker build).
-2. Add lightweight rate limiting on `/api/v1/predict`.
-3. Add batch prediction endpoint.
-4. Connect experiment tracking (MLflow or W&B).
-
-## Model Card
-- See `docs/model-card.md`.
