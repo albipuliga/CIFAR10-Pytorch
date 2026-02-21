@@ -110,10 +110,11 @@
         </div>
 
         <!-- Reports -->
-        <section class="card reports-section stagger">
-          <div class="card-header">
-            <h2>Reports</h2>
-          </div>
+        <details class="card reports-section stagger" open>
+          <summary class="card-header card-header--toggle">
+            <h2>Stats</h2>
+            <svg class="toggle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
           <div class="reports-grid">
             <div class="reports-col">
               <p class="col-label">Benchmark Metrics</p>
@@ -125,7 +126,7 @@
               <p id="figure-caption" class="figure-caption">No figure available.</p>
             </div>
           </div>
-        </section>
+        </details>
       </main>
     </div>
 
