@@ -81,10 +81,6 @@ Metrics below are from `src/reports/results.json` on the CIFAR-10 test set.
    - `http://localhost:8000/`
    - `http://localhost:8000/docs`
 
-## Deployment URL
-- Add your Render production URL here after first deploy:
-  - `https://<your-service>.onrender.com`
-
 ## Public API
 | Method | Path              | Purpose                                    |
 | ------ | ----------------- | ------------------------------------------ |

@@ -9,13 +9,16 @@ Inference-first FastAPI web application for CIFAR-10 image classification. Packa
 ## Commands
 
 ```bash
-# Install dependencies
+# Install dependencies (requires Python 3.14)
 uv sync
 
 # Run dev server with hot-reload
 uv run uvicorn webapp.main:app --host 0.0.0.0 --port 8000 --reload
 
-# Build and run Docker container
+# Dev with Docker (hot-reload, mounts webapp/ and src/)
+docker compose -f docker-compose.dev.yml up --build
+
+# Build and run production Docker container
 docker build -t cifar10-fastapi .
 docker run --rm -p 8000:8000 cifar10-fastapi
 
@@ -43,7 +46,7 @@ No test suite or lint config exists — testing is manual via the UI or `/docs`.
 **Request flow:**
 ```
 Browser (drag-drop upload) → FastAPI routes → PreprocessService (validate/resize 32×32/normalize)
-→ InferenceService (@torch.inference_mode) → ModelRegistry (BaselineCNN/CNNV2 .pth)
+→ _predict_with_model() in routes.py (@torch.inference_mode) → ModelRegistry (BaselineCNN/CNNV2 .pth)
 → PredictionResponse (predicted_class, confidence, top_k[], inference_ms, request_id)
 ```
 
@@ -58,14 +61,15 @@ Browser (drag-drop upload) → FastAPI routes → PreprocessService (validate/re
 | File | Purpose |
 |---|---|
 | [webapp/main.py](webapp/main.py) | FastAPI app init, lifespan, middleware, static mounts |
-| [webapp/api/routes.py](webapp/api/routes.py) | 5 API endpoints: `/`, `/health`, `/api/v1/models`, `/api/v1/predict`, `/api/v1/reports` |
+| [webapp/api/routes.py](webapp/api/routes.py) | 5 API endpoints + `_predict_with_model()` (inference logic lives here) |
 | [webapp/models/cnn.py](webapp/models/cnn.py) | `BaselineCNN` and `CNNV2` nn.Module definitions |
 | [webapp/services/model_registry.py](webapp/services/model_registry.py) | Loads `.pth` checkpoints, normalizes state_dict keys |
-| [webapp/services/inference.py](webapp/services/inference.py) | Softmax + top-k extraction with latency tracking |
 | [webapp/services/preprocess.py](webapp/services/preprocess.py) | MIME validation, size check, resize to 32×32, normalize |
 | [webapp/core/config.py](webapp/core/config.py) | `Settings` dataclass, reads env vars, exposes path properties |
 | [webapp/core/constants.py](webapp/core/constants.py) | CIFAR-10 class names, checkpoint filenames, normalization params |
 | [webapp/schemas/prediction.py](webapp/schemas/prediction.py) | All Pydantic request/response models and `ModelId` enum |
+| [webapp/web/templates/index.html](webapp/web/templates/index.html) | Jinja2 template for the main UI |
+| [webapp/web/static/](webapp/web/static/) | CSS and JS assets (`styles.css`, `app.js`) |
 | [src/checkpoints/](src/checkpoints/) | `best_baseline.pth`, `best_cnnv2.pth` — required at runtime |
 | [src/reports/](src/reports/) | Optional: `results.json` + figure images served by the reports endpoint |
 | [src/cnn.ipynb](src/cnn.ipynb) | Training notebook (not part of runtime) |
