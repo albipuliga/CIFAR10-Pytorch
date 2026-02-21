@@ -1,0 +1,16 @@
+[
+  {
+    "model":"cnnv2",
+    "test_accuracy":0.9056,
+    "test_precision_macro":0.9053472825,
+    "test_recall_macro":0.9056,
+    "test_f1_macro":0.9052225239
+  },
+  {
+    "model":"baseline",
+    "test_accuracy":0.7717,
+    "test_precision_macro":0.7698694347,
+    "test_recall_macro":0.7717,
+    "test_f1_macro":0.7702937134
+  }
+]

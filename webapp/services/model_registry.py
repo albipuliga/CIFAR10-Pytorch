@@ -34,9 +34,8 @@ class ModelRegistry:
                 continue
 
             model = create_model(model_id).to(self.device)
-            state_dict = torch.load(checkpoint_path, map_location=self.device)
-            if isinstance(state_dict, dict) and "state_dict" in state_dict:
-                state_dict = state_dict["state_dict"]
+            checkpoint_obj = torch.load(checkpoint_path, map_location=self.device)
+            state_dict = self._extract_state_dict(checkpoint_obj)
             if not isinstance(state_dict, dict):
                 raise RuntimeError(f"Invalid checkpoint format for {checkpoint_path}.")
 
@@ -59,6 +58,20 @@ class ModelRegistry:
         if model is None:
             raise KeyError(f"Model {model_id} is not loaded.")
         return model
+
+    @staticmethod
+    def _extract_state_dict(checkpoint_obj: object) -> dict[str, torch.Tensor] | None:
+        if isinstance(checkpoint_obj, dict):
+            for key in ("model_state_dict", "state_dict"):
+                value = checkpoint_obj.get(key)
+                if isinstance(value, dict):
+                    return value
+            # Some checkpoints are raw state_dicts without wrapper metadata.
+            if checkpoint_obj and all(isinstance(k, str) for k in checkpoint_obj):
+                return checkpoint_obj  # type: ignore[return-value]
+            if not checkpoint_obj:
+                return checkpoint_obj  # type: ignore[return-value]
+        return None
 
     def list_model_metadata(self) -> list[dict[str, str | int | ModelId]]:
         return [

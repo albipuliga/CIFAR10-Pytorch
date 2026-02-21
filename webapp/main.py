@@ -57,12 +57,12 @@ app = FastAPI(
 )
 
 app.mount("/static", StaticFiles(directory=str(settings.static_dir)), name="static")
-if settings.reports_dir.exists():
-    app.mount(
-        "/reports-assets",
-        StaticFiles(directory=str(settings.reports_dir)),
-        name="reports-assets",
-    )
+settings.reports_dir.mkdir(parents=True, exist_ok=True)
+app.mount(
+    "/reports-assets",
+    StaticFiles(directory=str(settings.reports_dir)),
+    name="reports-assets",
+)
 
 
 @app.middleware("http")

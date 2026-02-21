@@ -46,6 +46,16 @@ flowchart LR
 3. Verify:
    - `http://localhost:8000/health`
 
+## Docker Dev (Hot Reload)
+1. Start development container:
+   ```bash
+   docker compose -f docker-compose.dev.yml up --build
+   ```
+2. Edit files in `webapp/` or `src/` and changes reload automatically in the running container.
+3. Open:
+   - `http://localhost:8000/`
+   - `http://localhost:8000/docs`
+
 ## Deployment URL
 - Add your Render production URL here after first deploy:
   - `https://<your-service>.onrender.com`

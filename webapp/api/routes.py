@@ -5,13 +5,14 @@ from __future__ import annotations
 import json
 from time import perf_counter
 from typing import Annotated
+from urllib.parse import quote
 
 import torch
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse
 
-from webapp.core.constants import CIFAR10_CLASSES
 from webapp.core.config import Settings
+from webapp.core.constants import CIFAR10_CLASSES
 from webapp.schemas.prediction import (
     ErrorResponse,
     HealthResponse,
@@ -70,19 +71,45 @@ def _predict_with_model(
 
 
 def _load_report_metrics(settings: Settings) -> dict[str, object]:
-    results_path = settings.reports_dir / "results.json"
-    if not results_path.exists():
+    reports_dir = settings.reports_dir
+    expected_path = reports_dir / "results.json"
+    if not reports_dir.exists():
         return {
             "status": "missing",
-            "message": "No report metrics found at src/reports/results.json.",
+            "message": f"No report metrics found at {expected_path}.",
         }
 
-    with results_path.open("r", encoding="utf-8") as handle:
-        data = json.load(handle)
+    metrics_path = expected_path
+    if not metrics_path.exists():
+        json_candidates = sorted(
+            path
+            for path in reports_dir.iterdir()
+            if path.is_file() and path.suffix.lower() == ".json"
+        )
+        if not json_candidates:
+            return {
+                "status": "missing",
+                "message": f"No report metrics found at {expected_path}.",
+            }
+        metrics_path = json_candidates[0]
+
+    try:
+        with metrics_path.open("r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except json.JSONDecodeError:
+        return {
+            "status": "invalid",
+            "message": f"{metrics_path.name} is not valid JSON.",
+        }
 
     if isinstance(data, dict):
         return data
-    return {"status": "invalid", "message": "results.json is not a JSON object."}
+    if isinstance(data, list):
+        return {"models": data}
+    return {
+        "status": "invalid",
+        "message": f"{metrics_path.name} is not a JSON object or array.",
+    }
 
 
 def _load_report_figures(settings: Settings) -> list[ReportFigure]:
@@ -90,15 +117,36 @@ def _load_report_figures(settings: Settings) -> list[ReportFigure]:
         return []
 
     figures: list[ReportFigure] = []
+    figure_extensions = {".png", ".jpg", ".jpeg", ".svg", ".webp"}
+
+    # Top-level report dir
     for path in sorted(settings.reports_dir.iterdir()):
-        if path.suffix.lower() not in {".png", ".jpg", ".jpeg", ".svg", ".webp"}:
+        if not path.is_file():
+            continue
+        if path.suffix.lower() not in figure_extensions:
             continue
         figures.append(
             ReportFigure(
                 name=path.stem.replace("_", " ").title(),
-                url=f"/reports-assets/{path.name}",
+                url=f"/reports-assets/{quote(path.name)}",
             )
         )
+
+    # figures/ subdirectory
+    figures_dir = settings.reports_dir / "figures"
+    if figures_dir.is_dir():
+        for path in sorted(figures_dir.iterdir()):
+            if not path.is_file():
+                continue
+            if path.suffix.lower() not in figure_extensions:
+                continue
+            figures.append(
+                ReportFigure(
+                    name=path.stem.replace("_", " ").title(),
+                    url=f"/reports-assets/figures/{quote(path.name)}",
+                )
+            )
+
     return figures
 
 
