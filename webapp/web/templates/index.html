@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CIFAR-10 Classifier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <div class="header-inner">
+          <div class="header-brand">
+            <span class="brand-dot"></span>
+            <span class="brand-name">CIFAR-10</span>
+            <span class="brand-sep">/</span>
+            <span class="brand-sub">Image Classifier</span>
+          </div>
+          <div class="header-meta">
+            <span class="meta-chip">{{ default_model }}</span>
+            <span class="meta-chip">{{ max_upload_mb }} MB max</span>
+            <span class="meta-chip">32×32 input</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="main">
+        <div class="grid stagger">
+          <!-- Inference Console -->
+          <section class="card">
+            <div class="card-header">
+              <h2>Inference</h2>
+            </div>
+            <form id="predict-form" class="form">
+              <div class="field">
+                <label for="model-id">Model</label>
+                <select id="model-id" name="model_id">
+                  <option
+                    value="baseline"
+                    {% if default_model == "baseline" %}selected{% endif %}
+                  >Baseline CNN</option>
+                  <option
+                    value="cnnv2"
+                    {% if default_model == "cnnv2" %}selected{% endif %}
+                  >CNN V2</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="top-k">Top K</label>
+                <input
+                  id="top-k"
+                  name="top_k"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value="5"
+                  required
+                />
+              </div>
+
+              <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Upload image">
+                <input id="file-input" type="file" accept="image/png,image/jpeg" hidden />
+                <div class="dropzone-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </div>
+                <p>Drop image or <span class="dropzone-link">browse</span></p>
+                <small>PNG or JPEG</small>
+              </div>
+
+              <div id="preview-wrap" class="preview-wrap" hidden>
+                <img id="upload-preview" alt="Upload preview" hidden />
+                <p id="file-name">No file selected</p>
+              </div>
+
+              <button id="predict-btn" type="submit">Run Inference</button>
+            </form>
+          </section>
+
+          <!-- Results -->
+          <section class="card">
+            <div class="card-header">
+              <h2>Results</h2>
+              <span id="latency-badge" class="latency">— ms</span>
+            </div>
+            <div class="result">
+              <div class="result-empty" id="result-empty">
+                <p>Run inference to see predictions</p>
+              </div>
+              <div class="result-content" id="result-content" hidden>
+                <div class="result-top">
+                  <p id="predicted-class" class="result-class">—</p>
+                  <p id="confidence-line" class="result-confidence">—</p>
+                </div>
+                <ol id="top-k-list" class="topk-list"></ol>
+              </div>
+              <p id="error-message" class="error" hidden></p>
+            </div>
+          </section>
+        </div>
+
+        <!-- Reports -->
+        <section class="card reports-section stagger">
+          <div class="card-header">
+            <h2>Reports</h2>
+          </div>
+          <div class="reports-grid">
+            <div class="reports-col">
+              <p class="col-label">Benchmark Metrics</p>
+              <pre id="metrics-json" class="metrics-pre">Loading...</pre>
+            </div>
+            <div class="reports-col">
+              <p class="col-label">Figure</p>
+              <img id="report-figure" alt="Report figure" class="report-figure" hidden />
+              <p id="figure-caption" class="figure-caption">No figure available.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/static/js/app.js" defer></script>
+  </body>
+</html>
