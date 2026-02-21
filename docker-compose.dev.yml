@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./webapp:/app/webapp
+      - ./src:/app/src
+    command:
+      - uv
+      - run
+      - uvicorn
+      - webapp.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+      - --reload-dir
+      - /app/webapp
+      - --reload-dir
+      - /app/src
