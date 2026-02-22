@@ -15,6 +15,8 @@ const topKList = document.getElementById("top-k-list");
 const errorMessage = document.getElementById("error-message");
 const resultEmpty = document.getElementById("result-empty");
 const resultContent = document.getElementById("result-content");
+const resultPanel = document.getElementById("result-panel");
+const resultLoading = document.getElementById("result-loading");
 
 const metricsContainer = document.getElementById("metrics-container");
 const reportFigure = document.getElementById("report-figure");
@@ -99,6 +101,14 @@ async function setSelectedFile(file) {
 function setLoading(loading) {
   predictBtn.disabled = loading;
   predictBtn.textContent = loading ? "Running..." : "Run Inference";
+  if (resultLoading) {
+    resultLoading.hidden = !loading;
+    resultLoading.setAttribute("aria-hidden", loading ? "false" : "true");
+  }
+  if (resultPanel) {
+    resultPanel.classList.toggle("result--loading", loading);
+    resultPanel.setAttribute("aria-busy", loading ? "true" : "false");
+  }
 }
 
 function updateReportFigure(modelId) {

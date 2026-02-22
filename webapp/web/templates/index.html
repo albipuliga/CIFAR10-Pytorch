@@ -116,7 +116,7 @@
               <h2>Results</h2>
               <span id="latency-badge" class="latency">— ms</span>
             </div>
-            <div class="result">
+            <div id="result-panel" class="result" aria-busy="false">
               <div class="result-empty" id="result-empty">
                 <p>Run inference to see predictions</p>
               </div>
@@ -126,6 +126,31 @@
                   <p id="confidence-line" class="result-confidence">—</p>
                 </div>
                 <ol id="top-k-list" class="topk-list"></ol>
+              </div>
+              <div id="result-loading" class="result-loading" hidden aria-hidden="true">
+                <div class="skeleton result-skeleton-title"></div>
+                <div class="skeleton result-skeleton-subtitle"></div>
+                <div class="result-skeleton-list">
+                  <div class="result-skeleton-row">
+                    <div class="skeleton result-skeleton-label"></div>
+                    <div class="skeleton result-skeleton-value"></div>
+                  </div>
+                  <div class="skeleton result-skeleton-bar"></div>
+                </div>
+                <div class="result-skeleton-list">
+                  <div class="result-skeleton-row">
+                    <div class="skeleton result-skeleton-label"></div>
+                    <div class="skeleton result-skeleton-value"></div>
+                  </div>
+                  <div class="skeleton result-skeleton-bar"></div>
+                </div>
+                <div class="result-skeleton-list">
+                  <div class="result-skeleton-row">
+                    <div class="skeleton result-skeleton-label"></div>
+                    <div class="skeleton result-skeleton-value"></div>
+                  </div>
+                  <div class="skeleton result-skeleton-bar"></div>
+                </div>
               </div>
               <p id="error-message" class="error" hidden></p>
             </div>

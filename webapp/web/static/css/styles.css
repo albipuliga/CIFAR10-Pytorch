@@ -348,6 +348,7 @@ button:disabled {
 /* ── Result ── */
 
 .result {
+  position: relative;
   padding: 1.25rem;
   min-height: 280px;
   display: flex;
@@ -393,6 +394,82 @@ button:disabled {
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--muted);
+}
+
+.result-loading {
+  position: absolute;
+  inset: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  justify-content: center;
+}
+
+.result--loading .result-empty,
+.result--loading .result-content,
+.result--loading .error {
+  visibility: hidden;
+}
+
+.skeleton {
+  background: linear-gradient(100deg, #e5e7eb 12%, #f3f4f6 35%, #e5e7eb 60%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.1s linear infinite;
+  border-radius: 5px;
+}
+
+.result-skeleton-title {
+  width: 48%;
+  height: 28px;
+}
+
+.result-skeleton-subtitle {
+  width: 65%;
+  height: 12px;
+  margin-bottom: 0.45rem;
+}
+
+.result-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.result-skeleton-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.result-skeleton-label {
+  width: 28%;
+  height: 11px;
+}
+
+.result-skeleton-value {
+  width: 20%;
+  height: 11px;
+}
+
+.result-skeleton-bar {
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
 }
 
 /* ── Top-K bars ── */
