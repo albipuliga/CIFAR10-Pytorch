@@ -316,7 +316,17 @@ async function loadReports() {
 
 dropzone.addEventListener("click", () => fileInput.click());
 dropzone.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" || event.key === " ") {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    if (selectedFile && !predictBtn.disabled) {
+      void runPrediction();
+      return;
+    }
+    fileInput.click();
+    return;
+  }
+
+  if (event.key === " ") {
     event.preventDefault();
     fileInput.click();
   }
@@ -382,6 +392,27 @@ fileInput.addEventListener("change", async (event) => {
       error instanceof Error ? error.message : "Failed to select image.";
     errorMessage.hidden = false;
   }
+});
+
+window.addEventListener("keydown", async (event) => {
+  if (event.key !== "Enter" || event.repeat || event.isComposing) return;
+  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  if (!selectedFile || predictBtn.disabled) return;
+
+  const target = event.target;
+  if (
+    target instanceof HTMLElement &&
+    (target.tagName === "TEXTAREA" ||
+      target.tagName === "BUTTON" ||
+      target.isContentEditable)
+  ) {
+    return;
+  }
+
+  if (target instanceof Node && (target === dropzone || dropzone.contains(target))) return;
+
+  event.preventDefault();
+  await runPrediction();
 });
 
 form.addEventListener("submit", async (event) => {
