@@ -32,6 +32,28 @@
       </header>
 
       <main class="main">
+        <!-- About -->
+        <details class="card info-card stagger">
+          <summary class="card-header card-header--toggle">
+            <h2>About</h2>
+            <svg class="toggle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="info-body">
+            <p class="info-lead">
+              This classifier is trained on CIFAR-10 and predicts one of ten object categories.
+            </p>
+            <ul class="info-list">
+              <li><strong>Dataset:</strong> 60,000 color images at 32x32 resolution.</li>
+              <li><strong>Classes:</strong> airplane, automobile, bird, cat, deer, dog, frog, horse, ship, truck.</li>
+              <li><strong>Model:</strong> a CNN that learns visual features with convolution + pooling layers, then outputs class probabilities.</li>
+            </ul>
+            <p class="info-tip">
+              Tip: paste from clipboard with <strong>Ctrl/Cmd+V</strong>, or test with real photos from
+              <a href="https://images.google.com" target="_blank" rel="noopener noreferrer">Google Images</a>
+              (for example: "cargo ship", "golden retriever", "fighter jet") and compare confidence shifts.
+            </p>
+          </div>
+        </details>
         <div class="grid stagger">
           <!-- Inference Console -->
           <section class="card">
@@ -126,29 +148,6 @@
               <img id="report-figure" alt="Report figure" class="report-figure" hidden />
               <p id="figure-caption" class="figure-caption">No figure available.</p>
             </div>
-          </div>
-        </details>
-
-        <!-- About -->
-        <details class="card info-card stagger">
-          <summary class="card-header card-header--toggle">
-            <h2>About</h2>
-            <svg class="toggle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </summary>
-          <div class="info-body">
-            <p class="info-lead">
-              This classifier is trained on CIFAR-10 and predicts one of ten object categories.
-            </p>
-            <ul class="info-list">
-              <li><strong>Dataset:</strong> 60,000 color images at 32x32 resolution.</li>
-              <li><strong>Classes:</strong> airplane, automobile, bird, cat, deer, dog, frog, horse, ship, truck.</li>
-              <li><strong>Model:</strong> a CNN that learns visual features with convolution + pooling layers, then outputs class probabilities.</li>
-            </ul>
-            <p class="info-tip">
-              Tip: paste from clipboard with <strong>Ctrl/Cmd+V</strong>, or test with real photos from
-              <a href="https://images.google.com" target="_blank" rel="noopener noreferrer">Google Images</a>
-              (for example: "cargo ship", "golden retriever", "fighter jet") and compare confidence shifts.
-            </p>
           </div>
         </details>
       </main>
