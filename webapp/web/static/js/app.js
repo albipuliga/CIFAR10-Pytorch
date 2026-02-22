@@ -63,7 +63,9 @@ function hasSupportedExtension(fileName) {
 
 function cloneForUpload(file) {
   const mimeType = inferMimeType(file);
-  return new File([file], file.name, {
+  const normalizedName = (file.name || "").trim();
+  const safeName = normalizedName || (mimeType === "image/png" ? "clipboard-image.png" : "clipboard-image.jpg");
+  return new File([file], safeName, {
     type: mimeType || file.type || "application/octet-stream",
     lastModified: file.lastModified || Date.now(),
   });
@@ -341,6 +343,30 @@ dropzone.addEventListener("drop", async (event) => {
   } catch (error) {
     errorMessage.textContent =
       error instanceof Error ? error.message : "Failed to select image.";
+    errorMessage.hidden = false;
+  }
+});
+
+window.addEventListener("paste", async (event) => {
+  const items = event.clipboardData?.items;
+  if (!items) return;
+
+  const imageItem = [...items].find((item) => item.type.startsWith("image/"));
+  if (!imageItem) return;
+
+  const file = imageItem.getAsFile();
+  if (!file) {
+    errorMessage.textContent = "Clipboard image could not be read. Try copying it again.";
+    errorMessage.hidden = false;
+    return;
+  }
+
+  try {
+    await setSelectedFile(file);
+    event.preventDefault();
+  } catch (error) {
+    errorMessage.textContent =
+      error instanceof Error ? error.message : "Failed to read clipboard image.";
     errorMessage.hidden = false;
   }
 });
