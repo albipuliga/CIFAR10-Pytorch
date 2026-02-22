@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -32,24 +31,26 @@ class ReportFigure(BaseModel):
     url: str
 
 
+class ReportMetricEntry(BaseModel):
+    model: ModelId
+    test_accuracy: float | None = None
+    test_precision_macro: float | None = None
+    test_recall_macro: float | None = None
+    test_f1_macro: float | None = None
+
+
+class ReportMetrics(BaseModel):
+    models: list[ReportMetricEntry] = Field(default_factory=list)
+
+
 class ReportSummaryResponse(BaseModel):
-    metrics: dict[str, Any]
+    metrics: ReportMetrics
     figures: list[ReportFigure]
 
 
 class ErrorResponse(BaseModel):
     detail: str
     request_id: str | None = None
-
-
-class ModelMetadata(BaseModel):
-    id: ModelId
-    checkpoint: str
-    classes_count: int
-
-
-class ModelsResponse(BaseModel):
-    models: list[ModelMetadata]
 
 
 class HealthResponse(BaseModel):

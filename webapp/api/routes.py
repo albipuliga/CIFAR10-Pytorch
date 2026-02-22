@@ -2,24 +2,19 @@
 
 from __future__ import annotations
 
-import json
 from time import perf_counter
 from typing import Annotated
-from urllib.parse import quote
 
 import torch
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse
 
-from webapp.core.config import Settings
 from webapp.core.constants import CIFAR10_CLASSES
 from webapp.schemas.prediction import (
     ErrorResponse,
     HealthResponse,
     ModelId,
-    ModelsResponse,
     PredictionResponse,
-    ReportFigure,
     ReportSummaryResponse,
     TopKPrediction,
 )
@@ -70,86 +65,6 @@ def _predict_with_model(
     )
 
 
-def _load_report_metrics(settings: Settings) -> dict[str, object]:
-    reports_dir = settings.reports_dir
-    expected_path = reports_dir / "results.json"
-    if not reports_dir.exists():
-        return {
-            "status": "missing",
-            "message": f"No report metrics found at {expected_path}.",
-        }
-
-    metrics_path = expected_path
-    if not metrics_path.exists():
-        json_candidates = sorted(
-            path
-            for path in reports_dir.iterdir()
-            if path.is_file() and path.suffix.lower() == ".json"
-        )
-        if not json_candidates:
-            return {
-                "status": "missing",
-                "message": f"No report metrics found at {expected_path}.",
-            }
-        metrics_path = json_candidates[0]
-
-    try:
-        with metrics_path.open("r", encoding="utf-8") as handle:
-            data = json.load(handle)
-    except json.JSONDecodeError:
-        return {
-            "status": "invalid",
-            "message": f"{metrics_path.name} is not valid JSON.",
-        }
-
-    if isinstance(data, dict):
-        return data
-    if isinstance(data, list):
-        return {"models": data}
-    return {
-        "status": "invalid",
-        "message": f"{metrics_path.name} is not a JSON object or array.",
-    }
-
-
-def _load_report_figures(settings: Settings) -> list[ReportFigure]:
-    if not settings.reports_dir.exists():
-        return []
-
-    figures: list[ReportFigure] = []
-    figure_extensions = {".png", ".jpg", ".jpeg", ".svg", ".webp"}
-
-    # Top-level report dir
-    for path in sorted(settings.reports_dir.iterdir()):
-        if not path.is_file():
-            continue
-        if path.suffix.lower() not in figure_extensions:
-            continue
-        figures.append(
-            ReportFigure(
-                name=path.stem.replace("_", " ").title(),
-                url=f"/reports-assets/{quote(path.name)}",
-            )
-        )
-
-    # figures/ subdirectory
-    figures_dir = settings.reports_dir / "figures"
-    if figures_dir.is_dir():
-        for path in sorted(figures_dir.iterdir()):
-            if not path.is_file():
-                continue
-            if path.suffix.lower() not in figure_extensions:
-                continue
-            figures.append(
-                ReportFigure(
-                    name=path.stem.replace("_", " ").title(),
-                    url=f"/reports-assets/figures/{quote(path.name)}",
-                )
-            )
-
-    return figures
-
-
 @router.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
     settings = request.app.state.settings
@@ -173,12 +88,6 @@ async def health(request: Request) -> HealthResponse:
         models_loaded=registry.loaded_model_ids,
         version=settings.version,
     )
-
-
-@router.get("/api/v1/models", response_model=ModelsResponse)
-async def list_models(request: Request) -> ModelsResponse:
-    registry = request.app.state.model_registry
-    return ModelsResponse(models=registry.list_model_metadata())
 
 
 @router.post(
@@ -238,8 +147,4 @@ async def predict(
 
 @router.get("/api/v1/reports", response_model=ReportSummaryResponse)
 async def reports(request: Request) -> ReportSummaryResponse:
-    settings = request.app.state.settings
-    return ReportSummaryResponse(
-        metrics=_load_report_metrics(settings),
-        figures=_load_report_figures(settings),
-    )
+    return request.app.state.report_summary

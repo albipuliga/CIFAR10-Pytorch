@@ -7,7 +7,7 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 
-from webapp.core.constants import CIFAR10_CLASSES, MODEL_CHECKPOINT_FILENAMES
+from webapp.core.constants import MODEL_CHECKPOINT_FILENAMES
 from webapp.core.config import Settings
 from webapp.models.cnn import create_model
 from webapp.schemas.prediction import ModelId
@@ -17,7 +17,6 @@ class ModelRegistry:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self._models: dict[ModelId, nn.Module] = {}
-        self._checkpoint_paths: dict[ModelId, Path] = {}
         self.device = torch.device("cpu")
 
     @property
@@ -47,7 +46,6 @@ class ModelRegistry:
             model.eval()
 
             self._models[model_id] = model
-            self._checkpoint_paths[model_id] = checkpoint_path
 
         if missing_paths:
             expected = ", ".join(str(path) for path in missing_paths)
@@ -72,13 +70,3 @@ class ModelRegistry:
             if not checkpoint_obj:
                 return checkpoint_obj  # type: ignore[return-value]
         return None
-
-    def list_model_metadata(self) -> list[dict[str, str | int | ModelId]]:
-        return [
-            {
-                "id": model_id,
-                "checkpoint": str(self._checkpoint_paths[model_id].name),
-                "classes_count": len(CIFAR10_CLASSES),
-            }
-            for model_id in self.loaded_model_ids
-        ]

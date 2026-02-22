@@ -15,6 +15,7 @@ from fastapi.templating import Jinja2Templates
 from webapp.api.routes import router
 from webapp.core.config import settings
 from webapp.services.model_registry import ModelRegistry
+from webapp.services.reports import load_report_summary
 
 logger = logging.getLogger("webapp")
 
@@ -29,9 +30,11 @@ async def lifespan(app: FastAPI):
 
     model_registry = ModelRegistry(settings)
     model_registry.load_all()
+    report_summary = load_report_summary(settings)
 
     app.state.settings = settings
     app.state.model_registry = model_registry
+    app.state.report_summary = report_summary
     app.state.templates = Jinja2Templates(directory=str(settings.templates_dir))
 
     logger.info(

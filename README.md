@@ -98,10 +98,9 @@ Metrics below are from `src/reports/results.json` on the CIFAR-10 test set.
 | Method | Path              | Purpose                                    |
 | ------ | ----------------- | ------------------------------------------ |
 | GET    | `/health`         | service readiness and loaded models        |
-| GET    | `/api/v1/models`  | available model metadata                   |
 | POST   | `/api/v1/predict` | single-image prediction (multipart upload) |
 | GET    | `/api/v1/reports` | metrics + figure metadata for UI           |
-| GET    | `/`               | portfolio demo page                        |
+| GET    | `/`               | demo page                                  |
 
 ## Notes on Artifacts
 - Checkpoints expected at:
