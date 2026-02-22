@@ -1,7 +1,0 @@
-services:
-  - type: web
-    name: cifar10-fastapi-portfolio
-    runtime: docker
-    plan: free
-    dockerfilePath: ./Dockerfile
-    healthCheckPath: /health
