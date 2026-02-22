@@ -2,14 +2,13 @@ services:
   app:
     build:
       context: .
+      target: dev
     ports:
       - "8000:8000"
     volumes:
       - ./webapp:/app/webapp
       - ./src:/app/src
     command:
-      - uv
-      - run
       - uvicorn
       - webapp.main:app
       - --host
@@ -21,3 +20,11 @@ services:
       - /app/webapp
       - --reload-dir
       - /app/src
+      - --reload-include
+      - "*.py"
+      - --reload-include
+      - "*.html"
+      - --reload-include
+      - "*.css"
+      - --reload-include
+      - "*.js"

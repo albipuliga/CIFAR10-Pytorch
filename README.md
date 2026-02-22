@@ -73,11 +73,22 @@ Metrics below are from `src/reports/results.json` on the CIFAR-10 test set.
 3. Verify:
    - `http://localhost:8000/health`
 
+### Docker Build Notes
+- The production image is optimized for Railway with a multi-stage Docker build.
+- Runtime dependencies are split into:
+  - `requirements.railway.txt` (FastAPI/runtime libs from PyPI)
+  - `requirements.railway.torch.txt` (CPU-only `torch`/`torchvision` from the PyTorch CPU index)
+- This avoids downloading CUDA packages in cloud builds and reduces image push/build overhead.
+- Docker targets:
+  - `runtime` target (default): slim image for Railway/prod.
+  - `dev` target: adds `watchfiles` for better local hot reload UX.
+
 ## Docker Compose (Hot Reload)
 1. Start development container:
    ```bash
    docker compose -f docker-compose.dev.yml up --build
    ```
+   The compose file builds Docker `target: dev`, which enables `watchfiles`-based reloads for `*.py`, `*.html`, `*.css`, and `*.js`.
 2. Edit files in `webapp/` or `src/` and changes reload automatically in the running container.
 3. Open:
    - `http://localhost:8000/`
