@@ -353,6 +353,7 @@ window.addEventListener("paste", async (event) => {
 
   const imageItem = [...items].find((item) => item.type.startsWith("image/"));
   if (!imageItem) return;
+  event.preventDefault();
 
   const file = imageItem.getAsFile();
   if (!file) {
@@ -363,7 +364,6 @@ window.addEventListener("paste", async (event) => {
 
   try {
     await setSelectedFile(file);
-    event.preventDefault();
   } catch (error) {
     errorMessage.textContent =
       error instanceof Error ? error.message : "Failed to read clipboard image.";
