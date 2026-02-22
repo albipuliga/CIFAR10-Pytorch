@@ -2,6 +2,8 @@
 
 Inference-first web interface for a CIFAR-10 CNN project using FastAPI and a PyTorch CNN model.
 
+**Demo:** [https://cifar10-pytorch-production.up.railway.app/](https://cifar10-pytorch-production.up.railway.app/)
+
 ## Model Architecture
 The production `cnnv2` model is a 3-stage convolutional network for CIFAR-10 (`32x32` RGB input) with batch normalization and progressively stronger dropout regularization.
 
