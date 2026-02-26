@@ -111,6 +111,16 @@ function setLoading(loading) {
   }
 }
 
+function formatLatency(inferenceMs) {
+  if (!Number.isFinite(inferenceMs)) {
+    return "— ms";
+  }
+  if (inferenceMs >= 1500) {
+    return `${(inferenceMs / 1000).toFixed(2)} s`;
+  }
+  return `${inferenceMs.toFixed(2)} ms`;
+}
+
 function updateReportFigure(modelId) {
   const suffix = `confusion_matrix_${modelId}.png`;
   const figure = reportFigures.find((f) => f.url.includes(suffix));
@@ -285,7 +295,7 @@ async function runPrediction() {
     const payload = await response.json();
     predictedClass.textContent = payload.predicted_class;
     confidenceLine.textContent = `${(payload.confidence * 100).toFixed(2)}% confidence · ${payload.model_id}`;
-    latencyBadge.textContent = `${payload.inference_ms.toFixed(2)} ms`;
+    latencyBadge.textContent = formatLatency(payload.inference_ms);
     renderTopK(payload.top_k);
 
     resultEmpty.hidden = true;
